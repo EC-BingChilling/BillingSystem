@@ -110,35 +110,42 @@ void adminMenu() {
 }
 
 void login(char role) {
-    // Implement login functionality here
-    // Validate credentials from the respective file
-    // For simplicity, you can use hardcoded credentials for now
-    // Update the logic to read from the files
-
     char username[20];
     char password[20];
+    char fileUsername[20];
+    char filePassword[20];
+    char roleFromFile;
+    FILE *file;
 
     printf("Enter username: ");
     scanf("%s", username);
     printf("Enter password: ");
     scanf("%s", password);
 
-    if ((strcmp(username, "admin") == 0 && strcmp(password, "adminpass") == 0 && role == 'A') ||
-        (strcmp(username, "customer") == 0 && strcmp(password, "customerpass") == 0 && role == 'C')) {
-        printf("Login successful!\n");
-
-        if (role == 'A') {
-            // Admin menu
-            // Implement admin menu functionality
-            // Call functions like viewAllBills, manageCustomers, etc.
-        } else {
-            // Customer menu
-            // Implement customer menu functionality
-            // Call functions like inputUsageDetails, viewBill, etc.
-        }
-    } else {
-        printf("Invalid username or password. Login failed.\n");
+    file = fopen(userCredentialsFile, "r");
+    if (file == NULL) {
+        printf("Cannot open user credentials file.\n");
+        return;
     }
+
+    while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
+        roleFromFile = fileUsername[0];
+        if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0 && roleFromFile == role) {
+            printf("Login successful!\n");
+            fclose(file);
+
+            if (role == 'A') {
+                adminMenu();
+            } else {
+                customerMenu();
+            }
+
+            return;
+        }
+    }
+
+    printf("Invalid username or password. Login failed.\n");
+    fclose(file);
 }
 
 void inputUsageDetails(char* customerId) {
