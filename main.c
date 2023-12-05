@@ -157,21 +157,37 @@ void login(char role) {
 
 void inputUsageDetails(char* customerId) {
     float electricityUsage, gasUsage;
-    FILE *file;
+    char line[100];
+    FILE *file, *tempFile;
 
     printf("Enter electricity usage: ");
     scanf("%f", &electricityUsage);
     printf("Enter gas usage: ");
     scanf("%f", &gasUsage);
 
-    file = fopen(customerDataFile, "a");
-    if (file == NULL) {
-        printf("Cannot open customer data file.\n");
+    file = fopen(customerDataFile, "r");
+    tempFile = fopen("temp.txt", "w");
+
+    if (file == NULL || tempFile == NULL) {
+        printf("Cannot open file.\n");
         return;
     }
 
-    fprintf(file, "%s %f %f\n", customerId, electricityUsage, gasUsage);
+    while (fgets(line, sizeof(line), file) != NULL) {
+        char id[20];
+        sscanf(line, "%s", id);
+        if (strcmp(id, customerId) == 0) {
+            fprintf(tempFile, "%s %f %f\n", customerId, electricityUsage, gasUsage);
+        } else {
+            fputs(line, tempFile);
+        }
+    }
+
     fclose(file);
+    fclose(tempFile);
+
+    remove(customerDataFile);
+    rename("temp.txt", customerDataFile);
 }
 
 void viewBill(char* customerId) {
