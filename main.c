@@ -99,30 +99,6 @@ void customerMenu() {
     } while (customerChoice != '4');
 }
 
-void adminLoggedInMenu() {
-    char adminChoice;
-    do {
-        printf("\n====== Admin Logged In Menu ======\n");
-        printf("1. View All Bills\n");
-        printf("2. Exit to Admin Menu\n");
-        printf("==================================\n");
-        printf("Enter your choice: ");
-        scanf(" %c", &adminChoice);
-
-        switch (adminChoice) {
-            case '1':
-                viewAllBills();
-                break;
-            case '2':
-                printf("Exiting to Admin Menu.\n");
-                break;
-            default:
-                printf("Invalid choice. Please try again.\n");
-        }
-
-    } while (adminChoice != '2');
-}
-
 void adminMenu() {
     char adminChoice;
     do {
@@ -135,9 +111,7 @@ void adminMenu() {
 
         switch (adminChoice) {
             case '1':
-                if (login('A')) {
-                    adminLoggedInMenu();
-                }
+                login('A');
                 break;
             case '2':
                 printf("Exiting to main menu.\n");
@@ -173,13 +147,12 @@ void login(char role) {
         if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0 && roleFromFile == role) {
             printf("Login successful!\n");
             fclose(file);
-            return 1;
+            return;
         }
     }
 
     printf("Invalid username or password. Login failed.\n");
     fclose(file);
-    return 0;
 }
 
 void inputUsageDetails(char* customerId) {
