@@ -195,8 +195,25 @@ void viewBill(char* customerId) {
 }
 
 void viewAllBills() {
-    // Implement functionality for admin to view all bills
-    // Read all customer data from the customer_data.txt file and display it
+    FILE *file;
+    char id[20];
+    float electricityUsage, gasUsage;
+    float electricityRate = 0.12;
+    float gasRate = 0.15;
+    float totalBill;
+
+    file = fopen(customerDataFile, "r");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
+    printf("\n====== All Customer Bills ======\n");
+    while (fscanf(file, "%s %f %f", id, &electricityUsage, &gasUsage) != EOF) {
+        totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
+        printf("Customer ID: %s, Total Bill: $%.2f\n", id, totalBill);
+    }
+    fclose(file);
 }
 
 void manageCustomers() {
