@@ -1,0 +1,4 @@
+customer1 150 80
+sammu 200 90
+mikail 180 70
+eva 210 100
