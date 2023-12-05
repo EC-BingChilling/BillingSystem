@@ -352,6 +352,29 @@ int compareCustomers(const void *a, const void *b) {
 }
 
 void searchCustomer() {
-    // Implement functionality to search for a customer
-    // Read all customer data, search for the customer, and display the result
+    char customerId[20];
+    char line[100];
+    FILE *file;
+
+    printf("Enter customer ID to search: ");
+    scanf("%s", customerId);
+
+    file = fopen(customerDataFile, "r");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        char id[20];
+        sscanf(line, "%s", id);
+        if (strcmp(id, customerId) == 0) {
+            printf("Found customer: %s\n", line);
+            fclose(file);
+            return;
+        }
+    }
+
+    printf("No customer found with the given ID.\n");
+    fclose(file);
 }
