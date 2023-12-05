@@ -173,12 +173,13 @@ void login(char role) {
         if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0 && roleFromFile == role) {
             printf("Login successful!\n");
             fclose(file);
-            return;
+            return 1;
         }
     }
 
     printf("Invalid username or password. Login failed.\n");
     fclose(file);
+    return 0;
 }
 
 void inputUsageDetails(char* customerId) {
