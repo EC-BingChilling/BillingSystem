@@ -253,8 +253,27 @@ void manageCustomers() {
 }
 
 void addCustomer() {
-    // Implement functionality to add a new customer
-    // Append the new customer's data to the customer_data.txt file
+    struct Customer newCustomer;
+    FILE *file;
+
+    printf("Enter customer ID: ");
+    scanf("%s", newCustomer.id);
+    printf("Enter customer name: ");
+    scanf("%s", newCustomer.name);
+    newCustomer.electricityUsage = 0;
+    newCustomer.gasUsage = 0;
+    newCustomer.totalBill = 0;
+
+    file = fopen(customerDataFile, "a");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
+    fprintf(file, "%s %s %f %f %f\n", newCustomer.id, newCustomer.name, newCustomer.electricityUsage, newCustomer.gasUsage, newCustomer.totalBill);
+    fclose(file);
+
+    printf("Customer added successfully.\n");
 }
 
 void removeCustomer() {
