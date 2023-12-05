@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define MAX_CUSTOMERS 100
 
 // Function prototypes
 void customerMenu();
@@ -309,6 +310,13 @@ void removeCustomer() {
     printf("Customer removed successfully.\n");
 }
 
+// Comparison function for qsort
+int compareCustomers(const void *a, const void *b) {
+    struct Customer *customerA = (struct Customer *)a;
+    struct Customer *customerB = (struct Customer *)b;
+    return strcmp(customerA->id, customerB->id);
+}
+
 void sortCustomers() {
     struct Customer customers[MAX_CUSTOMERS];
     int numCustomers = 0;
@@ -344,11 +352,6 @@ void sortCustomers() {
 
     // Step 6: Close the file
     fclose(file);
-}
-
-// Comparison function for qsort
-int compareCustomers(const void *a, const void *b) {
-    return strcmp(((struct Customer *)a)->id, ((struct Customer *)b)->id);
 }
 
 void searchCustomer() {
