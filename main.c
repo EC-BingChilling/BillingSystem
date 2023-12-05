@@ -277,8 +277,36 @@ void addCustomer() {
 }
 
 void removeCustomer() {
-    // Implement functionality to remove a customer
-    // Delete the customer's data from the customer_data.txt file
+    char customerId[20];
+    char line[100];
+    FILE *file, *tempFile;
+
+    printf("Enter customer ID to remove: ");
+    scanf("%s", customerId);
+
+    file = fopen(customerDataFile, "r");
+    tempFile = fopen("temp.txt", "w");
+
+    if (file == NULL || tempFile == NULL) {
+        printf("Cannot open file.\n");
+        return;
+    }
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+        char id[20];
+        sscanf(line, "%s", id);
+        if (strcmp(id, customerId) != 0) {
+            fputs(line, tempFile);
+        }
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    remove(customerDataFile);
+    rename("temp.txt", customerDataFile);
+
+    printf("Customer removed successfully.\n");
 }
 
 void sortCustomers() {
