@@ -310,8 +310,45 @@ void removeCustomer() {
 }
 
 void sortCustomers() {
-    // Implement functionality to sort customers (e.g., by ID or name)
-    // Read all customer data, sort it, and update the customer_data.txt file
+    struct Customer customers[MAX_CUSTOMERS];
+    int numCustomers = 0;
+    FILE *file;
+
+    // Step 1: Open the file for reading
+    file = fopen(customerDataFile, "r");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
+    // Step 2: Read all customer data into an array
+    while (fscanf(file, "%s %s %f %f %f", customers[numCustomers].id, customers[numCustomers].name, &customers[numCustomers].electricityUsage, &customers[numCustomers].gasUsage, &customers[numCustomers].totalBill) != EOF) {
+        numCustomers++;
+    }
+    fclose(file);
+
+    // Step 3: Sort the array
+    qsort(customers, numCustomers, sizeof(struct Customer), compareCustomers);
+
+    // Step 4: Open the file for writing
+    file = fopen(customerDataFile, "w");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
+    // Step 5: Write the sorted data back into the file
+    for (int i = 0; i < numCustomers; i++) {
+        fprintf(file, "%s %s %f %f %f\n", customers[i].id, customers[i].name, customers[i].electricityUsage, customers[i].gasUsage, customers[i].totalBill);
+    }
+
+    // Step 6: Close the file
+    fclose(file);
+}
+
+// Comparison function for qsort
+int compareCustomers(const void *a, const void *b) {
+    return strcmp(((struct Customer *)a)->id, ((struct Customer *)b)->id);
 }
 
 void searchCustomer() {
