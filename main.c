@@ -104,7 +104,8 @@ void adminMenu() {
     do {
         printf("\n====== Admin Menu ======\n");
         printf("1. Login\n");
-        printf("2. Exit to main menu\n");
+        printf("2. Mangae customer\n");
+        printf("3. Exit to main menu\n");
         printf("=======================\n");
         printf("Enter your choice: ");
         scanf(" %c", &adminChoice);
@@ -114,6 +115,8 @@ void adminMenu() {
                 login('A');
                 break;
             case '2':
+                manageCustomers();
+            case '3':
                 printf("Exiting to main menu.\n");
                 break;
             default:
