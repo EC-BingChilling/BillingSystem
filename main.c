@@ -64,10 +64,13 @@ int main() {
 
 void customerMenu() {
     char customerChoice;
+    char customerId[20];
     do {
         printf("\n====== Customer Menu ======\n");
         printf("1. Login\n");
-        printf("2. Exit to main menu\n");
+        printf("2. Input Usage Details\n");
+        printf("3. View Bill\n");
+        printf("4. Exit to main menu\n");
         printf("===========================\n");
         printf("Enter your choice: ");
         scanf(" %c", &customerChoice);
@@ -77,13 +80,23 @@ void customerMenu() {
                 login('C');
                 break;
             case '2':
+                printf("Enter your customer ID: ");
+                scanf("%s", customerId);
+                inputUsageDetails(customerId);
+                break;
+            case '3':
+                printf("Enter your customer ID: ");
+                scanf("%s", customerId);
+                viewBill(customerId);
+                break;
+            case '4':
                 printf("Exiting to main menu.\n");
                 break;
             default:
                 printf("Invalid choice. Please try again.\n");
         }
 
-    } while (customerChoice != '2');
+    } while (customerChoice != '4');
 }
 
 void adminMenu() {
