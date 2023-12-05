@@ -149,8 +149,22 @@ void login(char role) {
 }
 
 void inputUsageDetails(char* customerId) {
-    // Implement functionality for customers to input usage details
-    // Update the customer's data in the customer_data.txt file
+    float electricityUsage, gasUsage;
+    FILE *file;
+
+    printf("Enter electricity usage: ");
+    scanf("%f", &electricityUsage);
+    printf("Enter gas usage: ");
+    scanf("%f", &gasUsage);
+
+    file = fopen(customerDataFile, "a");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
+    fprintf(file, "%s %f %f\n", customerId, electricityUsage, gasUsage);
+    fclose(file);
 }
 
 void viewBill(char* customerId) {
@@ -218,5 +232,3 @@ void searchCustomer() {
     // Implement functionality to search for a customer
     // Read all customer data, search for the customer, and display the result
 }
-
-//test
