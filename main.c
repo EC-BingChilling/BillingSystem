@@ -134,13 +134,6 @@ void login(char role) {
         if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0 && roleFromFile == role) {
             printf("Login successful!\n");
             fclose(file);
-
-            if (role == 'A') {
-                adminMenu();
-            } else {
-                customerMenu();
-            }
-
             return;
         }
     }
