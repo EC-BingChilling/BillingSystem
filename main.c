@@ -3,17 +3,19 @@
 #include <string.h>
 #define MAX_CUSTOMERS 100
 
+char username[20]; // Global variable
+
 // Function prototypes
 void customerMenu();
 void adminMenu();
 void login(char role);
-void inputUsageDetails(char* customerId);
-void viewBill(char* customerId);
+void inputUsageDetails(char* username);
+void viewBill(char* username);
 void viewAllBills();
 void manageCustomers();
 void addCustomer();
 void removeCustomer();
-void sortCustomers();
+void sortCustomers(); 
 void searchCustomer();
 
 // File paths
@@ -64,12 +66,12 @@ int main() {
 
 void customerMenu() {
     char customerChoice;
-    char customerId[20];
+    //char username[20];
     do {
-        printf("\n====== Customer Menu ======\n");
+        printf("\n====== Customer Menu ======\n"); 
         printf("1. Login\n");
-        printf("2. Input Usage Details\n");
-        printf("3. View Bill\n");
+        printf("2. Input Usage Details\n"); //! needs to be put in after the login function
+        printf("3. View Bill\n"); //! needs to be put in after the login function
         printf("4. Exit to main menu\n");
         printf("===========================\n");
         printf("Enter your choice: ");
@@ -78,16 +80,15 @@ void customerMenu() {
         switch (customerChoice) {
             case '1':
                 login('C');
+                printf("\nWelcome, %s!\n", username); //? Testing to see what's stored in username
                 break;
-            case '2':
-                printf("Enter your customer ID: ");
-                scanf("%s", customerId);
-                inputUsageDetails(customerId);
+            case '2': 
+                inputUsageDetails(username);
                 break;
             case '3':
-                printf("Enter your customer ID: ");
-                scanf("%s", customerId);
-                viewBill(customerId);
+                printf("Enter your customer ID: "); //! can be removed, will show up after the login function
+                scanf("%s", username); //! can be removed, will show up after the login function
+                viewBill(username);
                 break;
             case '4':
                 printf("Exiting to main menu.\n");
@@ -104,7 +105,7 @@ void adminMenu() {
     do {
         printf("\n====== Admin Menu ======\n");
         printf("1. Login\n");
-        printf("2. Mangae customer\n");
+        printf("2. Manage customer\n"); //! needs to be put in after the login
         printf("3. Exit to main menu\n");
         printf("=======================\n");
         printf("Enter your choice: ");
@@ -127,7 +128,7 @@ void adminMenu() {
 }
 
 void login(char role) {
-    char username[20];
+    //char username[20];
     char password[20];
     char fileUsername[20];
     char filePassword[20];
@@ -136,8 +137,10 @@ void login(char role) {
 
     printf("Enter username: ");
     scanf("%s", username);
+    printf("%s\n", username); //? Testing what username is
     printf("Enter password: ");
     scanf("%s", password);
+    printf("%s\n", password); //? Testing what password is
 
     file = fopen(userCredentialsFile, "r");
     if (file == NULL) {
@@ -158,7 +161,7 @@ void login(char role) {
     fclose(file);
 }
 
-void inputUsageDetails(char* customerId) {
+void inputUsageDetails(char* username) {
     float electricityUsage, gasUsage;
     char line[100];
     FILE *file, *tempFile;
@@ -179,8 +182,8 @@ void inputUsageDetails(char* customerId) {
     while (fgets(line, sizeof(line), file) != NULL) {
         char id[20];
         sscanf(line, "%s", id);
-        if (strcmp(id, customerId) == 0) {
-            fprintf(tempFile, "%s %f %f\n", customerId, electricityUsage, gasUsage);
+        if (strcmp(id, username) == 0) {
+            fprintf(tempFile, "%s %f %f\n", username, electricityUsage, gasUsage);
         } else {
             fputs(line, tempFile);
         }
@@ -193,7 +196,7 @@ void inputUsageDetails(char* customerId) {
     rename("temp.txt", customerDataFile);
 }
 
-void viewBill(char* customerId) {
+void viewBill(char* username) {
     FILE *file;
     char id[20];
     float electricityUsage, gasUsage;
@@ -208,7 +211,7 @@ void viewBill(char* customerId) {
     }
 
     while (fscanf(file, "%s %f %f", id, &electricityUsage, &gasUsage) != EOF) {
-        if (strcmp(id, customerId) == 0) {
+        if (strcmp(id, username) == 0) {
             totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
             printf("Your total bill is: $%.2f\n", totalBill);
             fclose(file);
@@ -228,7 +231,7 @@ void viewAllBills() {
     float gasRate = 0.15;
     float totalBill;
 
-    file = fopen(customerDataFile, "r");
+    file = fopen(customerDataFile, "r"); 
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
         return;
@@ -237,7 +240,10 @@ void viewAllBills() {
     printf("\n====== All Customer Bills ======\n");
     while (fscanf(file, "%s %f %f", id, &electricityUsage, &gasUsage) != EOF) {
         totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
-        printf("Customer ID: %s, Total Bill: $%.2f\n", id, totalBill);
+        if (strcmp(id, "0.000000") == 0) {
+            continue; // Skip to the next iteration of the loop if the ID is 0.000000
+        }
+        printf("Customer ID: %s, Electricity Usage: %.2f, Gas Usage: %.2f, Total Bill: $%.2f\n", id, electricityUsage, gasUsage, totalBill);
     }
     fclose(file);
 }
@@ -250,7 +256,8 @@ void manageCustomers() {
         printf("2. Remove Customer\n");
         printf("3. Sort Customers\n");
         printf("4. Search Customer\n");
-        printf("5. Exit to admin menu\n");
+        printf("5. View All Bills\n");
+        printf("6. Exit to admin menu\n");
         printf("=============================\n");
         printf("Enter your choice: ");
         scanf(" %c", &adminChoice);
@@ -269,13 +276,16 @@ void manageCustomers() {
                 searchCustomer();
                 break;
             case '5':
-                printf("Exiting to admin menu.\n");
+                viewAllBills();
+                break;
+            case '6':
+                //printf("Exiting to admin menu.\n");
                 break;
             default:
                 printf("Invalid choice. Please try again.\n");
         }
 
-    } while (adminChoice != '5');
+    } while (adminChoice != '6');
 }
 
 void addCustomer() {
@@ -303,12 +313,12 @@ void addCustomer() {
 }
 
 void removeCustomer() {
-    char customerId[20];
+    char username[20];
     char line[100];
     FILE *file, *tempFile;
 
     printf("Enter customer ID to remove: ");
-    scanf("%s", customerId);
+    scanf("%s", username);
 
     file = fopen(customerDataFile, "r");
     tempFile = fopen("temp.txt", "w");
@@ -321,7 +331,7 @@ void removeCustomer() {
     while (fgets(line, sizeof(line), file) != NULL) {
         char id[20];
         sscanf(line, "%s", id);
-        if (strcmp(id, customerId) != 0) {
+        if (strcmp(id, username) != 0) {
             fputs(line, tempFile);
         }
     }
@@ -380,12 +390,12 @@ void sortCustomers() {
 }
 
 void searchCustomer() {
-    char customerId[20];
+    char username[20];
     char line[100];
     FILE *file;
 
     printf("Enter customer ID to search: ");
-    scanf("%s", customerId);
+    scanf("%s", username);
 
     file = fopen(customerDataFile, "r");
     if (file == NULL) {
@@ -396,7 +406,7 @@ void searchCustomer() {
     while (fgets(line, sizeof(line), file) != NULL) {
         char id[20];
         sscanf(line, "%s", id);
-        if (strcmp(id, customerId) == 0) {
+        if (strcmp(id, username) == 0) {
             printf("Found customer: %s\n", line);
             fclose(file);
             return;
