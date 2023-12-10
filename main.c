@@ -13,7 +13,7 @@ void inputUsageDetails(char* username);
 void viewBill(char* username);
 void viewAllBills();
 void manageCustomers();
-void addCustomer();
+int addCustomer();
 void removeCustomer();
 void sortCustomers(); 
 void searchCustomer();
@@ -39,7 +39,6 @@ struct Customer {
 int main() {
     char choice;
     int options;
-    
 
     do {
         printf("\n====== Customer Billing System ======\n");
@@ -68,9 +67,8 @@ int main() {
                         }
                         else{
                             printf("Login failed");
-                            }
-                        
-                        break;
+                            break;
+                        }
                     case 2:
                         addCustomer();
                         break;
@@ -79,8 +77,8 @@ int main() {
                         exit(0);
                     default:
                         printf("Invalid choice. Please enter again.\n");
-                } //while (options != 3);
-
+                } break;
+                //while (options != 3);
             case '2':
                     if (login('A')) {
                         memmove(username, username + 1, strlen(username)); // Removes the 'A' from the username
@@ -305,7 +303,7 @@ void manageCustomers() {
     } while (adminChoice != '7');
 }
 
-void addCustomer() {
+int addCustomer() {
     struct Customer newCustomer;
     FILE *file;
     FILE *file2;
@@ -326,13 +324,11 @@ void addCustomer() {
     file = fopen(customerDataFile, "a");
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
-        return ;
     }
 
     file2 = fopen(userCredentialsFile, "a");
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
-        return;
     }
     fprintf(file2, "%s %s %s\n", newCustomer.id, newCustomer.name, newCustomer.password);
 
@@ -342,6 +338,8 @@ void addCustomer() {
     fclose(file2);
 
     printf("Customer added successfully.\n");
+
+    return 0;
 }
 
 void removeCustomer() {
@@ -473,7 +471,8 @@ int userCredentials(){
     }
     char line[100];
 
-    printf("\n====== All Customer Credentials =====\n");
+    printf("\n=============== All Customer Credentials ===============\n");
+    printf("\nCustomer Name\tElectricity Usage\tGas Usage\tTotal Bill\n");
     while (fgets(line, sizeof(line),file) != NULL) {
         printf("%s",line);
     }
