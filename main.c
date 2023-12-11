@@ -16,7 +16,7 @@ void manageCustomers();
 int addCustomer();
 void removeCustomer();
 void sortCustomers(); 
-void searchCustomer();
+int searchCustomer();
 int userCredentials();
 
 
@@ -24,11 +24,8 @@ int userCredentials();
 const char* userCredentialsFile = "user_credentials.txt";
 const char* customerDataFile = "customer_data.txt";
 
-// Other global variables and structures as needed
-
-// Sample structure to represent a customer
 struct Customer {
-    char id[20];
+    char id[50];
     char name[50];
     char password[50];
     float electricityUsage;
@@ -37,10 +34,11 @@ struct Customer {
 };
 
 int main() {
+    // define switch statement variables
     char choice;
     int options;
 
-    do {
+    do { // main menu
         printf("\n====== Customer Billing System ======\n");
         printf("1. Customer\n");
         printf("2. Admin\n");
@@ -78,17 +76,16 @@ int main() {
                     default:
                         printf("Invalid choice. Please enter again.\n");
                 } break;
-                //while (options != 3);
             case '2':
-                    if (login('A')) {
-                        memmove(username, username + 1, strlen(username)); // Removes the 'A' from the username
-                        printf("\nWelcome, %s!\n", username);
-                        manageCustomers();
-                        break;
+                if (login('A')) {
+                    memmove(username, username + 1, strlen(username)); // Removes the 'A' from the username
+                    printf("\nWelcome, %s!\n", username);
+                    manageCustomers();
+                    break;
                         }
-                    else {
-                        printf("Login failed");
-                        break;
+                else {
+                    printf("Login failed\n");
+                    break;
                         }
             case '3':
                 printf("Exiting the program. Goodbye!\n");
@@ -106,7 +103,7 @@ int main() {
 
 void customerMenu() {
     char customerChoice;
-    //char username[20];
+    
     do {
         printf("\n====== Customer Menu ======\n"); 
         printf("1. Input Usage Details\n"); 
@@ -116,7 +113,7 @@ void customerMenu() {
         printf("Enter your choice: ");
         scanf(" %c", &customerChoice);
 
-        //printf("\n%s!\n", id);
+        
 
         switch (customerChoice) {
             case '1': 
@@ -132,12 +129,12 @@ void customerMenu() {
             default:
                 printf("Invalid choice. Please try again.\n");
         }
-        break;
+        
 
     } while (customerChoice != '3');
 }
 int login(char role) {
-    //char username[20];
+    
     char password[20];
     char fileUsername[20];
     char filePassword[20];
@@ -165,13 +162,14 @@ int login(char role) {
         }
     }
 
-    //printf("Invalid username or password. Login failed.\n");
     fclose(file);
     return 0; // if failed
 }
 
 void inputUsageDetails(char* username) {
-    float electricityUsage, gasUsage;
+    float electricityUsage, gasUsage,total;
+    float electricityRate = 0.12;
+    float gasRate = 0.15;
     char line[100];
     FILE *tmpfile;
     FILE *file;
@@ -194,7 +192,8 @@ void inputUsageDetails(char* username) {
         char id[20];
         sscanf(line, "%s", id);
         if (strcmp(username, id) == 0) {
-            fprintf(tmpfile, "%s %f %f\n", username, electricityUsage, gasUsage);
+            total = (electricityUsage * electricityRate) + (gasUsage * gasRate);
+            fprintf(tmpfile, "%s %f %f %f\n", username, electricityUsage, gasUsage,total);
         } else {
             fputs(line, tmpfile);
         }
@@ -213,7 +212,7 @@ void viewBill(char* username) {
     float electricityUsage, gasUsage;
     float electricityRate = 0.12;
     float gasRate = 0.15;
-    float totalBill;
+    float total;
 
     file = fopen(customerDataFile, "r");
     if (file == NULL) {
@@ -221,10 +220,12 @@ void viewBill(char* username) {
         return;
     }
 
-    while (fscanf(file, "%s %f %f", id, &electricityUsage, &gasUsage) != EOF) {
+    while (fscanf(file, "%s %f %f %f", id, &electricityUsage, &gasUsage ,&total) != EOF) {
         if (strcmp(id, username) == 0) {
-            totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
-            printf("Your total bill is: $%.2f\n", totalBill);
+            //totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
+            printf("Electricity Usage: %.2f\n", electricityUsage);
+            printf("Gas Usage: %.2f\n", gasUsage);
+            printf("Your total bill is: $%.2f\n", total);
             fclose(file);
             return;
         }
@@ -294,7 +295,6 @@ void manageCustomers() {
                 userCredentials();
                 break;
             case '7':
-                //printf("Exiting to admin menu.\n");
                 break;
             default:
                 printf("Invalid choice. Please try again.\n");
@@ -307,15 +307,13 @@ int addCustomer() {
     struct Customer newCustomer;
     FILE *file;
     FILE *file2;
+    char line[100];
 
-    //newCustomer.id = 'C';
-
-    //printf("Enter customer ID: ");
-    //scanf("%s", newCustomer.id);
     printf("Enter customer name: ");
     scanf("%c%s", newCustomer.id, newCustomer.name);
     printf("Enter customer password: ");
     scanf("%s", newCustomer.password);
+
     
     newCustomer.electricityUsage = 0;
     newCustomer.gasUsage = 0;
@@ -330,9 +328,13 @@ int addCustomer() {
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
     }
-    fprintf(file2, "%s %s %s\n", newCustomer.id, newCustomer.name, newCustomer.password);
 
-    fprintf(file, "%s %s %f %f %f\n", newCustomer.id, newCustomer.name, newCustomer.electricityUsage, newCustomer.gasUsage, newCustomer.totalBill);
+
+    fprintf(file2, "%s %s %s\n",newCustomer.id, newCustomer.name, newCustomer.password);
+
+    memmove(newCustomer.name, newCustomer.name + 1, strlen(newCustomer.name)); // Removes the 'C' from the username
+
+    fprintf(file,"%s %s %f %f %f\n",newCustomer.id , newCustomer.name, newCustomer.electricityUsage, newCustomer.gasUsage, newCustomer.totalBill);
     
     fclose(file);
     fclose(file2);
@@ -360,6 +362,16 @@ void removeCustomer() {
         return;
     }
 
+    while (fgets(line, sizeof(line), file2) != NULL) {
+        char id[20];
+        sscanf(line, "%s", id);
+        if (strcmp(id, username) != 0) {
+            fputs(line, tmpfile2);
+        }
+    }
+
+    memmove(username, username + 1, strlen(username)); // Removes the 'C' from the username
+
     while (fgets(line, sizeof(line), file) != NULL) {
         char id[20];
         sscanf(line, "%s", id);
@@ -368,13 +380,6 @@ void removeCustomer() {
         }
     }
 
-    while (fgets(line, sizeof(line), file2) != NULL) {
-        char id[20];
-        sscanf(line, "%s", id);
-        if (strcmp(id, username) != 0) {
-            fputs(line, tmpfile2);
-        }
-    }
 
     fclose(file);
     fclose(file2);
@@ -434,7 +439,7 @@ void sortCustomers() {
     fclose(file);
 }
 
-void searchCustomer() {
+int searchCustomer() {
     char username[20];
     char line[100];
     FILE *file;
@@ -445,8 +450,11 @@ void searchCustomer() {
     file = fopen(customerDataFile, "r");
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
-        return;
+        return 0;
     }
+
+    memmove(username, username + 1, strlen(username)); // Removes the 'C' from the username
+
 
     while (fgets(line, sizeof(line), file) != NULL) {
         char id[20];
@@ -454,12 +462,13 @@ void searchCustomer() {
         if (strcmp(id, username) == 0) {
             printf("Found customer: %s\n", line);
             fclose(file);
-            return;
+            return 1;
         }
     }
 
     printf("No customer found with the given ID.\n");
     fclose(file);
+    return 0;
 }
 int userCredentials(){
     FILE *file;
@@ -472,7 +481,7 @@ int userCredentials(){
     char line[100];
 
     printf("\n=============== All Customer Credentials ===============\n");
-    printf("\nCustomer Name\tElectricity Usage\tGas Usage\tTotal Bill\n");
+    printf("\nCustomer Name   Password\n" );
     while (fgets(line, sizeof(line),file) != NULL) {
         printf("%s",line);
     }
