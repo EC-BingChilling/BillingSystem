@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAX_CUSTOMERS 100
+#define MAX_CUSTOMERS 100 // set max amount of characters
 
-char username[20]; // Global variable
+char username[20]; // Global variable to store username
 
 // Function prototypes
 void customerMenu();
-int login(char role);
-void inputUsageDetails(char* username);
-void viewBill(char* username);
+int login(char role); // takes in parameter char named role(C or A) and returns an integer
+void inputUsageDetails(char* username); // takes in char* pointer named username and returns nothing, function may use or modify contents of the username array
+void viewBill(char* username); // takes in char* pointer and the function may use username to retrieve and display bill info for corresponding customer
 void viewAllBills();
 void manageCustomers();
 int addCustomer();
@@ -20,8 +20,8 @@ int userCredentials();
 
 
 // File paths
-const char* userCredentialsFile = "user_credentials.txt";
-const char* customerDataFile = "customer_data.txt";
+const char* userCredentialsFile = "user_credentials.txt"; // pointer to constant char so the data it points to which is the string cant be modified thru the pointer
+const char* customerDataFile = "customer_data.txt"; // pointer to constant char so the data it points to which is also the string cannot be modified thru the pointer
 // sturct for customer 
 struct Customer {
     char id[50];
@@ -218,7 +218,7 @@ void inputUsageDetails(char* username) {
 void viewBill(char* username) {
     //variables 
     FILE *file;
-    char id[20];
+    char name[20];
     float electricityUsage, gasUsage;
     float total;
 
@@ -228,8 +228,8 @@ void viewBill(char* username) {
         return;
     }
     // loops through the file and gets the id electric usage , gas usage and total
-    while (fscanf(file, "%s %f %f %f", id, &electricityUsage, &gasUsage ,&total) != EOF) {
-        if (strcmp(id, username) == 0) { // compare id and username 
+    while (fscanf(file, "%s %f %f %f", name, &electricityUsage, &gasUsage ,&total) != EOF) {
+        if (strcmp(name, username) == 0) { // compare id and username 
             // if they match print the information 
             printf("Electricity Usage: %.2f\n", electricityUsage);
             printf("Gas Usage: %.2f\n", gasUsage);
@@ -245,7 +245,7 @@ void viewBill(char* username) {
 
 void viewAllBills() {
     FILE *file;
-    char id[20];
+    char name[20];
     float electricityUsage, gasUsage;
     float electricityRate = 0.12;
     float gasRate = 0.15;
@@ -259,9 +259,9 @@ void viewAllBills() {
 
     printf("\n====== All Customer Bills ======\n");
     // loops through the file and gets the id electric usage , gas usage and total
-    while (fscanf(file, "%s %f %f %f", id, &electricityUsage, &gasUsage, &totalBill) != EOF) {
+    while (fscanf(file, "%s %f %f %f", name, &electricityUsage, &gasUsage, &totalBill) != EOF) {
         // prints everyline 
-        printf("Customer ID: %s, Electricity Usage: %.2f, Gas Usage: %.2f, Total Bill: $%.2f\n", id, electricityUsage, gasUsage, totalBill);
+        printf("Customer ID: %s, Electricity Usage: %.2f, Gas Usage: %.2f, Total Bill: $%.2f\n", name, electricityUsage, gasUsage, totalBill);
     }
     fclose(file);
 }
@@ -360,11 +360,11 @@ int addCustomer() {
     }
 
     // write information to custormer credentials
-    fprintf(file2, "%s %s %s\n",newCustomer.id, newCustomer.name, newCustomer.password);
+    fprintf(file2, "%s %s\n", newCustomer.name, newCustomer.password);
     
     memmove(newCustomer.name, newCustomer.name + 1, strlen(newCustomer.name)); // Removes the 'C' from the username
     // write to customer data file 
-    fprintf(file,"%s %s %f %f %f\n",newCustomer.id , newCustomer.name, newCustomer.electricityUsage, newCustomer.gasUsage, newCustomer.totalBill);
+    fprintf(file," %s %f %f %f\n" , newCustomer.name, newCustomer.electricityUsage, newCustomer.gasUsage, newCustomer.totalBill);
     
     fclose(file);
     fclose(file2);
@@ -432,13 +432,16 @@ void removeCustomer() {
 int compareCustomers(const void *a, const void *b) {
     struct Customer *customerA = (struct Customer *)a;
     struct Customer *customerB = (struct Customer *)b;
-    return strcmp(customerA->id, customerB->id);
+    return strcmp(customerA->name, customerB->name);
 }
 
 void sortCustomers() {
     struct Customer customers[MAX_CUSTOMERS];
+    struct Customer custlogin[MAX_CUSTOMERS];
     int numCustomers = 0;
+    int numlogin =0;
     FILE *file;
+    FILE *file2;
 
     // Step 1: Open the file for reading
     file = fopen(customerDataFile, "r");
@@ -446,15 +449,27 @@ void sortCustomers() {
         printf("Cannot open customer data file.\n");
         return;
     }
+    
+    file2 = fopen(userCredentialsFile, "r");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
 
     // Step 2: Read all customer data into an array
-    while (fscanf(file, "%s %s %f %f %f", customers[numCustomers].id, customers[numCustomers].name, &customers[numCustomers].electricityUsage, &customers[numCustomers].gasUsage, &customers[numCustomers].totalBill) != EOF) {
+    while (fscanf(file, " %s %f %f %f", customers[numCustomers].name, &customers[numCustomers].electricityUsage, &customers[numCustomers].gasUsage, &customers[numCustomers].totalBill) != EOF) {
         numCustomers++;
     }
     fclose(file);
 
+     while (fscanf(file2, " %s %s", custlogin[numlogin].name,custlogin[numlogin].password) != EOF) {
+        numlogin++;
+    }
+    fclose(file2);
+
     // Step 3: Sort the array
     qsort(customers, numCustomers, sizeof(struct Customer), compareCustomers);
+    qsort(custlogin, numlogin, sizeof(struct Customer), compareCustomers);
 
     // Step 4: Open the file for writing
     file = fopen(customerDataFile, "w");
@@ -463,13 +478,26 @@ void sortCustomers() {
         return;
     }
 
+    file2 = fopen(userCredentialsFile, "w");
+    if (file == NULL) {
+        printf("Cannot open customer data file.\n");
+        return;
+    }
+
     // Step 5: Write the sorted data back into the file
     for (int i = 0; i < numCustomers; i++) {
-        fprintf(file, "%s %s %f %f %f\n", customers[i].id, customers[i].name, customers[i].electricityUsage, customers[i].gasUsage, customers[i].totalBill);
+        fprintf(file, "%s %f %f %f\n",customers[i].name, customers[i].electricityUsage, customers[i].gasUsage, customers[i].totalBill);
+    }
+
+    for (int i = 0; i < numlogin; i++) {
+        fprintf(file2, " %s %s\n", custlogin[i].name, custlogin[i].password);
     }
 
     // Step 6: Close the file
     fclose(file);
+    fclose(file2);
+
+    printf("Sorted succesfully");
 }
 
 int searchCustomer() {
