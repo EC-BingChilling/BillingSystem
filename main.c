@@ -7,7 +7,6 @@ char username[20]; // Global variable
 
 // Function prototypes
 void customerMenu();
-void adminMenu();
 int login(char role);
 void inputUsageDetails(char* username);
 void viewBill(char* username);
@@ -23,7 +22,7 @@ int userCredentials();
 // File paths
 const char* userCredentialsFile = "user_credentials.txt";
 const char* customerDataFile = "customer_data.txt";
-
+// sturct for customer 
 struct Customer {
     char id[50];
     char name[50];
@@ -49,6 +48,7 @@ int main() {
 
         switch (choice) {
             case '1':
+                // customer options 
                 printf("1. Login\n");
                 printf("2. Create User\n");
                 printf("3. Exit\n");
@@ -57,34 +57,34 @@ int main() {
                 
                 switch (options) {
                     case 1:
-                        if (login('C')) {
+                        if (login('C')) {  // calling the login function to see if login is correct 
                             memmove(username, username + 1, strlen(username)); // Removes the 'C' from the username
-                            printf("\nWelcome, %s!\n", username);
-                            customerMenu();
+                            printf("\nWelcome, %s!\n", username); // welcomes the user 
+                            customerMenu();  // calling customer menu 
                             break;
                         }
                         else{
-                            printf("Login failed");
+                            printf("Login failed"); // returns this statment when login is incorrect 
                             break;
                         }
                     case 2:
-                        addCustomer();
+                        addCustomer();  // calling function to create new user 
                         break;
                     case 3:
-                        printf("Exiting the program. Goodbye!\n");
+                        printf("Exiting the program. Goodbye!\n"); // leaving the menu 
                         exit(0);
                     default:
-                        printf("Invalid choice. Please enter again.\n");
+                        printf("Invalid choice. Please enter again.\n");  // output when wrong option is entered 
                 } break;
             case '2':
-                if (login('A')) {
+                if (login('A')) {  // calling login function with A character for admin login check 
                     memmove(username, username + 1, strlen(username)); // Removes the 'A' from the username
                     printf("\nWelcome, %s!\n", username);
-                    manageCustomers();
+                    manageCustomers(); // admin menu 
                     break;
                         }
                 else {
-                    printf("Login failed\n");
+                    printf("Login failed\n"); // not correct login
                     break;
                         }
             case '3':
@@ -95,7 +95,7 @@ int main() {
         }
         
 
-    } while (choice != '3');
+    } while (choice != '3'); // keeps the opions of the main menu going till 3 is entered 
 
     return 0;
 }
@@ -117,10 +117,10 @@ void customerMenu() {
 
         switch (customerChoice) {
             case '1': 
-                inputUsageDetails(username);
+                inputUsageDetails(username); // calling input usage function with username as parametere so the right users info is entered
                 break;
             case '2':
-                viewBill(username);
+                viewBill(username); // users bill is viewed 
                 break;
             case '3':
                 printf("Exiting to main menu.\n");
@@ -133,28 +133,34 @@ void customerMenu() {
 
     } while (customerChoice != '3');
 }
+
+// login function 
 int login(char role) {
-    
+    // variables 
     char password[20];
     char fileUsername[20];
     char filePassword[20];
     char roleFromFile;
     FILE *file;
 
+    // getting login information
     printf("Enter username: ");
     scanf("%s", username);
     printf("Enter password: ");
     scanf("%s", password);
 
-    
+    // opening file to read 
     file = fopen(userCredentialsFile, "r");
+    // if file does not exist inform the user 
     if (file == NULL) {
         printf("Cannot open user credentials file.\n");
         return 0;
     }
 
+    // loops through the file  and gets username and password from the file
     while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
-        roleFromFile = fileUsername[0];
+        roleFromFile = fileUsername[0]; // the C or A character is saved in rolefromFile 
+        // checks if username matches with any in the file and if the password matches     checks the A and C charcter 
         if (strcmp(username, fileUsername) == 0 && strcmp(password, filePassword) == 0 && roleFromFile == role) {
             printf("Login successful!\n");
             fclose(file);
@@ -167,51 +173,53 @@ int login(char role) {
 }
 
 void inputUsageDetails(char* username) {
+    // variables 
     float electricityUsage, gasUsage,total;
-    float electricityRate = 0.12;
+    //predetermined rates 
+    float electricityRate = 0.12; 
     float gasRate = 0.15;
     char line[100];
     FILE *tmpfile;
     FILE *file;
 
+    // getting user input 
     printf("Enter electricity usage: ");
     scanf("%f", &electricityUsage);
     printf("Enter gas usage: ");
     scanf("%f", &gasUsage);
-
+    // creating a temporary file for storing data
     file = fopen(customerDataFile, "r");
     tmpfile = fopen("temp.txt", "w");
 
-
+    // checking if the file exists 
     if (file == NULL || tmpfile == NULL) {
         printf("Cannot open file.\n");
         return;
     }
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        char id[20];
-        sscanf(line, "%s", id);
-        if (strcmp(username, id) == 0) {
-            total = (electricityUsage * electricityRate) + (gasUsage * gasRate);
-            fprintf(tmpfile, "%s %f %f %f\n", username, electricityUsage, gasUsage,total);
-        } else {
-            fputs(line, tmpfile);
+        char id[20]; // stores the id from the file 
+        sscanf(line, "%s", id); //reads the line and gets the id 
+        if (strcmp(username, id) == 0) {  // compares the id extracted with username 
+            total = (electricityUsage * electricityRate) + (gasUsage * gasRate);  // calculates the total bill
+            fprintf(tmpfile, "%s %f %f %f\n", username, electricityUsage, gasUsage,total); // writes to the temp file 
+        } else { 
+            fputs(line, tmpfile); //if the id and username does match then it just puts the line in tmep as is
         }
     }
-
+    // close both files 
     fclose(file);
     fclose(tmpfile);
 
-    remove(customerDataFile);
-    rename("temp.txt", customerDataFile);
+    remove(customerDataFile); // delete the customer data file 
+    rename("temp.txt", customerDataFile); // name the tempfile customer data file 
 }
 
 void viewBill(char* username) {
+    //variables 
     FILE *file;
     char id[20];
     float electricityUsage, gasUsage;
-    float electricityRate = 0.12;
-    float gasRate = 0.15;
     float total;
 
     file = fopen(customerDataFile, "r");
@@ -219,10 +227,10 @@ void viewBill(char* username) {
         printf("Cannot open customer data file.\n");
         return;
     }
-
+    // loops through the file and gets the id electric usage , gas usage and total
     while (fscanf(file, "%s %f %f %f", id, &electricityUsage, &gasUsage ,&total) != EOF) {
-        if (strcmp(id, username) == 0) {
-            //totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
+        if (strcmp(id, username) == 0) { // compare id and username 
+            // if they match print the information 
             printf("Electricity Usage: %.2f\n", electricityUsage);
             printf("Gas Usage: %.2f\n", gasUsage);
             printf("Your total bill is: $%.2f\n", total);
@@ -230,7 +238,7 @@ void viewBill(char* username) {
             return;
         }
     }
-
+    //if id and user name don't match return this mesage 
     printf("No data found for the given customer ID.\n");
     fclose(file);
 }
@@ -250,17 +258,15 @@ void viewAllBills() {
     }
 
     printf("\n====== All Customer Bills ======\n");
-    while (fscanf(file, "%s %f %f", id, &electricityUsage, &gasUsage) != EOF) {
-        totalBill = (electricityUsage * electricityRate) + (gasUsage * gasRate);
-        if (strcmp(id, "0.000000") == 0) {
-            continue; // Skip to the next iteration of the loop if the ID is 0.000000
-        }
+    // loops through the file and gets the id electric usage , gas usage and total
+    while (fscanf(file, "%s %f %f %f", id, &electricityUsage, &gasUsage, &totalBill) != EOF) {
+        // prints everyline 
         printf("Customer ID: %s, Electricity Usage: %.2f, Gas Usage: %.2f, Total Bill: $%.2f\n", id, electricityUsage, gasUsage, totalBill);
     }
     fclose(file);
 }
 
-void manageCustomers() {
+void manageCustomers() { // admin menu
     char adminChoice;
     do {
         printf("\n====== Admin Menu ======\n");
@@ -274,7 +280,8 @@ void manageCustomers() {
         printf("=============================\n");
         printf("Enter your choice: ");
         scanf(" %c", &adminChoice);
-
+        
+        //calling the related functions based on user input 
         switch (adminChoice) {
             case '1':
                 addCustomer();
@@ -304,21 +311,44 @@ void manageCustomers() {
 }
 
 int addCustomer() {
+    // create new struct variable 
     struct Customer newCustomer;
+
     FILE *file;
     FILE *file2;
     char line[100];
 
+    // user input 
     printf("Enter customer name: ");
-    scanf("%c%s", newCustomer.id, newCustomer.name);
+    scanf("%s",newCustomer.name);
+
+    //check if the customer already exists 
+    file2 = fopen(userCredentialsFile, "r");
+    if (file2 == NULL) {
+        printf("Cannot open user credentials file.\n");
+        return 1;
+    }
+    // loops through and gets each line 
+    while (fgets(line, sizeof(line), file2) != NULL) {
+        char existingUsername[20]; // variable for username in file 
+        sscanf(line, "%s", existingUsername); // gets username from file 
+        if (strcmp(existingUsername, newCustomer.name) == 0) { // compare name in file to new name input 
+            printf("Username already exists.\n"); // if already there tell usere 
+            fclose(file2);
+            return 1;
+        }
+    }
+    fclose(file2);
+    // not in file get password for user 
     printf("Enter customer password: ");
     scanf("%s", newCustomer.password);
 
-    
+    // set intial amounts to zero
     newCustomer.electricityUsage = 0;
     newCustomer.gasUsage = 0;
     newCustomer.totalBill = 0;
 
+    // open files and check they exsit
     file = fopen(customerDataFile, "a");
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
@@ -329,11 +359,11 @@ int addCustomer() {
         printf("Cannot open customer data file.\n");
     }
 
-
+    // write information to custormer credentials
     fprintf(file2, "%s %s %s\n",newCustomer.id, newCustomer.name, newCustomer.password);
-
+    
     memmove(newCustomer.name, newCustomer.name + 1, strlen(newCustomer.name)); // Removes the 'C' from the username
-
+    // write to customer data file 
     fprintf(file,"%s %s %f %f %f\n",newCustomer.id , newCustomer.name, newCustomer.electricityUsage, newCustomer.gasUsage, newCustomer.totalBill);
     
     fclose(file);
@@ -345,54 +375,57 @@ int addCustomer() {
 }
 
 void removeCustomer() {
-    char username[20];
-    char line[100];
-    FILE *file, *tmpfile, *file2, *tmpfile2;
+    char username[20]; // Variable to store customer ID
+    char line[100]; // Buffer to read lines from a file
+    FILE *file, *tmpfile, *file2, *tmpfile2; // File pointers
 
     printf("Enter customer ID to remove: ");
-    scanf("%s", username); 
+    scanf("%s", username); // Reads the customer ID
 
-    file = fopen(customerDataFile, "r");
+    // opens the needed file to read and wrtie 
+    file = fopen(customerDataFile, "r"); 
     file2 = fopen(userCredentialsFile, "r");
-    tmpfile = fopen("temp.txt", "w");
-    tmpfile2 = fopen("temp2.txt", "w");
+    tmpfile = fopen("temp.txt", "w"); 
+    tmpfile2 = fopen("temp2.txt", "w"); 
 
-    if (file == NULL || tmpfile == NULL || file2 == NULL) {
+    if (file == NULL || tmpfile == NULL || file2 == NULL) { // Checks if file opening failed
         printf("Cannot open file.\n");
         return;
     }
 
-    while (fgets(line, sizeof(line), file2) != NULL) {
-        char id[20];
-        sscanf(line, "%s", id);
-        if (strcmp(id, username) != 0) {
+    while (fgets(line, sizeof(line), file2) != NULL) { // Reads lines from user credentials file
+        char id[20]; // Variable to store an ID from the file
+        sscanf(line, "%s", id); // Reads an ID from the line
+
+        if (strcmp(id, username) != 0) { // Compares IDs, writes to temp file if not matching
             fputs(line, tmpfile2);
         }
     }
 
     memmove(username, username + 1, strlen(username)); // Removes the 'C' from the username
 
-    while (fgets(line, sizeof(line), file) != NULL) {
-        char id[20];
-        sscanf(line, "%s", id);
-        if (strcmp(id, username) != 0) {
+    while (fgets(line, sizeof(line), file) != NULL) { // Reads lines from customer data file
+        char id[20]; // Variable to store an ID from the file
+        sscanf(line, "%s", id); // Reads an ID from the line
+
+        if (strcmp(id, username) != 0) { // Compares IDs, writes to temp file if not matching
             fputs(line, tmpfile);
         }
     }
 
-
-    fclose(file);
+    // closes all the files
+    fclose(file); 
     fclose(file2);
-    fclose(tmpfile);
-    fclose(tmpfile2);
+    fclose(tmpfile); 
+    fclose(tmpfile2); 
 
-    remove(customerDataFile);
-    rename("temp.txt", customerDataFile);
+    remove(customerDataFile); // Removes original customer data file
+    rename("temp.txt", customerDataFile); // Renames temporary file to the original
 
-    remove(userCredentialsFile);
-    rename("temp2.txt", userCredentialsFile);
+    remove(userCredentialsFile); // Removes original user credentials file
+    rename("temp2.txt", userCredentialsFile); // Renames temporary file to the original
 
-    printf("Customer removed successfully.\n");
+    printf("Customer removed successfully.\n"); // Prints success message
 }
 
 // Comparison function for qsort
@@ -440,13 +473,16 @@ void sortCustomers() {
 }
 
 int searchCustomer() {
+    //variables
     char username[20];
     char line[100];
     FILE *file;
 
+    // user input 
     printf("Enter customer ID to search: ");
     scanf("%s", username);
 
+    // open file and check 
     file = fopen(customerDataFile, "r");
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
@@ -455,11 +491,11 @@ int searchCustomer() {
 
     memmove(username, username + 1, strlen(username)); // Removes the 'C' from the username
 
-
+    // loops through all the lines from the file
     while (fgets(line, sizeof(line), file) != NULL) {
         char id[20];
-        sscanf(line, "%s", id);
-        if (strcmp(id, username) == 0) {
+        sscanf(line, "%s", id); // gets id from the lide 
+        if (strcmp(id, username) == 0) { // compare id to username 
             printf("Found customer: %s\n", line);
             fclose(file);
             return 1;
@@ -470,23 +506,24 @@ int searchCustomer() {
     fclose(file);
     return 0;
 }
-int userCredentials(){
+
+int userCredentials() {
     FILE *file;
 
-    file = fopen(userCredentialsFile, "r"); 
+    file = fopen(userCredentialsFile, "r");
     if (file == NULL) {
         printf("Cannot open customer data file.\n");
         return 1;
     }
-    char line[100];
+    char username[50];
+    char password[50];
 
     printf("\n=============== All Customer Credentials ===============\n");
-    printf("\nCustomer Name   Password\n" );
-    while (fgets(line, sizeof(line),file) != NULL) {
-        printf("%s",line);
+    printf("%-20s %-20s\n", "Name", "Password"); 
+    printf("-------------------------------------------\n");
+    while (fscanf(file, "%s %s", username, password) != EOF) { // get username and password from the file 
+        printf("%-20s %-20s\n", username, password); //print the information 
     }
     fclose(file);
-
     return 0;
-
 }
